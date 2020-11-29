@@ -12,6 +12,7 @@ class Pymmander():
 
     def __init__(self):
         self.root = Path.root
+        self.home = Path.home()
         self.currentdir = Path(Path.home(), "test", "src", "aa")
         self.showHidden = False
 
@@ -36,52 +37,83 @@ class Pymmander():
         return pathified
 
 
-    def open_dir(self, name):
-        path = self.pathify(name)
+    def open_dir(self, path):
+        path = self.pathify(path)
         if not Path.is_dir(path):
-            print("{} is not a directory".format(name))
+            print("{} nie jest folderem".format(path.name))
         else:
             self.currentdir = path
 
     def open_parentdir(self):
         self.currentdir = self.currentdir.parent
 
+    def open_home(self):
+        self.currentdir = self.home
+
     def copy(self, src, dest):
         src, dest = self.pathify(src, dest)
         if src.is_dir():
-            self.copydir(src, dest)
+            self._copydir(src, dest)
             return
 
         try:
             shutil.copy(src, dest)
         except shutil.SameFileError:
-            print("Taki sam plik już istnieje")
+            print("Taki sam plik już istnieje")     #TODO: ma się wypisać w gdzieś w TUI
 
-    def copydir(self, src, dest):
+    def _copydir(self, src, dest):
+        src, dest = self.pathify(src, dest)
+        if not src.is_dir():
+            raise AttributeError("{} nie jest folderem".format(src.name))
+
         try:
             shutil.copytree(src, dest)
         except FileExistsError:
-            print("Taki sam folder już istnieje")
+            print("Taki sam folder już istnieje") #TODO: wypisać w TUI
 
     def move(self, src, dest):
+        src, dest = self.pathify(src, dest)
+
+        if dest.is_file:
+            print("{} już istnieje, nadpisać?".format(dest.name))   #TODO: Wybranie opcji
+
+        src = str(src)
+        dest = str(dest)
         shutil.move(src, dest)
 
-    def mkdir(self, path):
-        pass
+    def mkdir(self, name):
+        try:
+            pm.currentdir.joinpath(name).mkdir()
+        except FileExistsError:
+            print("{} już istnieje".format(name)) # TODO: wypisać w TUI
 
-    def remove(self, path):
-        pass
+    def remove(self, name):
+        path = self.pathify(name)
+
+        if path.is_dir():
+            shutil.rmtree(path)
+        else:
+            os.remove(path)
 
     def rename(self, old, new):
-        pass
+        old, new = self.pathify(old, new)
+
+        if new.exists():
+            print("{} już istnieje".format(new.name))
+        else:
+            old.rename(new)
+        
 
     def switch_hidden(self):
         self.showHidden = not self.showHidden
+
+    def disk_usage(self):
+        return shutil.disk_usage(self.currentdir)
 
 
 if __name__ == "__main__":
 
     pm = Pymmander()
-    listdir = pm.list_current_dir()
-    print(listdir)
-    pm.copy('ab', 'abcd')
+    print(pm.currentdir.name)
+    pm.remove("trelelraler")
+
