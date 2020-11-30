@@ -95,13 +95,6 @@ class Pymmander():
             return self.panes[0]
         return None
 
-    def get_currentdir_of_other_pane(self, name):
-        if name == 'a':
-            return self.panes[1].currentdir
-        elif name == 'b':
-            return self.panes[0].currentdir
-        return None
-
     def open_dir(self, path):
         path = self.pathify(path)
         if not Path.is_dir(path):
