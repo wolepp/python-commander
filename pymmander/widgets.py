@@ -49,6 +49,12 @@ class Pane(urwid.ListBox):
             button = FileButton(f, self.filebutton_clicked)
             self.body.append(button)
 
+    def copy(self):
+        other_pane = self.pm.get_other_pane(self.name)
+        src = self.focus.file
+        dest = other_pane.currentdir
+        self.pm.copy(src, dest)
+
     def keypress(self, size, key):
         key = super(Pane, self).keypress(size, key)
         fp = self.focus_position
@@ -58,6 +64,7 @@ class Pane(urwid.ListBox):
             self.pm.header.set_text("Pokazuje pomoc")
         elif key == 'f2':
             self.pm.header.set_text("Kopiuje {}".format("TODO"))
+            self.copy()
         elif key == 'f3':
             self.pm.header.set_text("Przesuwam {}".format("TODO"))
         elif key == 'f4':

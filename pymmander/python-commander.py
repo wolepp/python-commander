@@ -26,19 +26,19 @@ class Pymmander():
     def __init__(self):
         self.root = Path.root
         self.home = Path.home()
-        self.startdir = Path(Path.home(), "test", "src", "aa")
+        self.currentdir = Path(Path.home(), "test", "src", "aa")
         self.showHidden = False
         # UI Settings
         self.active_pane = 0
         self.arr = ">>"
         self.hid = "show"
-        self.text_header = str(self.startdir)
+        self.text_header = str(self.currentdir)
         self.header = urwid.AttrWrap(urwid.Text(self.text_header), 'header')
         self.text_footer = self.get_text_footer()
         self.footer = urwid.AttrWrap(urwid.Text(self.text_footer), 'footer')
         self.panes = urwid.Columns(
-            [widgets.Pane("a", self.startdir, self),
-            widgets.Pane("b", self.startdir, self)
+            [widgets.Pane("a", self.currentdir, self),
+            widgets.Pane("b", self.currentdir, self)
             ], 3)
         self.top = urwid.AttrMap(urwid.Frame(self.panes, header=self.header, footer=self.footer), 'body')
 
@@ -88,6 +88,19 @@ class Pymmander():
             return pathified[0]
         return pathified
 
+    def get_other_pane(self, name):
+        if name == 'a':
+            return self.panes[1]
+        elif name == 'b':
+            return self.panes[0]
+        return None
+
+    def get_currentdir_of_other_pane(self, name):
+        if name == 'a':
+            return self.panes[1].currentdir
+        elif name == 'b':
+            return self.panes[0].currentdir
+        return None
 
     def open_dir(self, path):
         path = self.pathify(path)
