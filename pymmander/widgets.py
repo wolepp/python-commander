@@ -14,7 +14,7 @@ class FileButton(urwid.Button):
                 self.caption = "~"+file.name
         cur_pos = len(self.caption) + 1 # chowa kursor
         self._w = urwid.AttrMap(urwid.SelectableIcon(self.caption, cur_pos), 'file', focus_map='focus')
-
+    
 class Pane(urwid.ListBox):
     def __init__(self, name, path, pm):
         self.name = name
@@ -42,10 +42,13 @@ class Pane(urwid.ListBox):
         self.pm.header.set_text(self.currentdir.name)
         self.update_content()
 
+    def update_header(self):
+        self.pm.header.set_text("Asdf")
+
     def update_content(self):
+        self.update_header()
         del self.body[1:]
         for f in self.pm.list_dir(self.currentdir):
-            self.pm.header.set_text(str(self.currentdir))
             button = FileButton(f, self.filebutton_clicked)
             self.body.append(button)
 
@@ -60,6 +63,10 @@ class Pane(urwid.ListBox):
         src = self.focus.file
         dest = other_pane.currentdir
         self.pm.move(src, dest)
+
+    def remove(self):
+        src = self.focus.file
+        self.pm.remove(src)
 
     def keypress(self, size, key):
         key = super(Pane, self).keypress(size, key)
@@ -77,7 +84,9 @@ class Pane(urwid.ListBox):
         elif key == 'f5':
             self.pm.header.set_text("Zmieniam nazwę")
         elif key == 'f6':
-            self.pm.header.set_text("Usuwam {}".format("TODO"))
+            name = self.focus.file.name
+            # TODO: zamienić na wywołanie self.remove
+            self.pm.header.set_text("Usunięto by {}".format(name)) 
         elif key == 'f7':
             self.pm.switch_hidden()
         elif key == 'left':
