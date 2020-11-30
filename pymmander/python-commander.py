@@ -24,7 +24,7 @@ class Pymmander():
     def __init__(self, removing=False):
         self.root = Path.root
         self.home = Path.home()
-        self.currentdir = Path(Path.home(), "test", "src", "aa")
+        self.currentdir = Path(Path.home())
         self.showHidden = False
         self.removing = removing
         # UI Settings
