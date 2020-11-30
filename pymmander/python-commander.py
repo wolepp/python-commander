@@ -6,6 +6,19 @@ import sys
 import getpass
 from pathlib import Path
 
+import urwid
+import widgets
+
+
+palette = [
+    ('body', 'white', 'dark blue'),
+    ('pane', 'white', 'light blue'),
+    ('file', 'white', 'dark blue'),
+    ('focus', 'black,bold', 'light blue'),
+    ('header', 'light blue', 'black'),
+    ('footer', 'light blue', 'black'),
+]
+
 
 class Pymmander():
     """File manager"""
@@ -15,12 +28,43 @@ class Pymmander():
         self.home = Path.home()
         self.currentdir = Path(Path.home(), "test", "src", "aa")
         self.showHidden = False
+        # UI Settings
+        self.active_pane = 0
+        self.arr = ">>"
+        self.hid = "show"
+        self.text_header = str(self.currentdir)
+        self.header = urwid.AttrWrap(urwid.Text(self.text_header), 'header')
+        self.text_footer = "F1 Copy {} | F2 Move {} | F3 Mkdir | F4 Rename | F5 Remove | F6 {} hidden files | F8 Quit".format(self.arr, self.arr, self.hid)
+        self.footer = urwid.AttrWrap(urwid.Text(self.text_footer), 'footer')
+        self.panes = urwid.Columns(
+            [widgets.Pane("a", self.currentdir, self),
+            widgets.Pane("b", self.currentdir, self)
+            ], 3)
+        self.top = urwid.AttrMap(urwid.Frame(self.panes, header=self.header, footer=self.footer), 'body')
 
     def list_current_dir(self):
-        listdir = os.listdir(self.currentdir)
+        self.list_dir(self.currentdir)
+    
+    def list_dir(self, path, only_names=False):
+        listdir = os.listdir(path)
+        if only_names:
+            if self.showHidden:
+                return listdir
+            return list(filter(lambda fname: fname[0] != '.', listdir))
+
+        paths = [path.joinpath(el) for el in listdir]
         if self.showHidden:
-            return listdir
-        return list(filter(lambda name: name[0] != '.', listdir))
+            return paths
+        return list(filter(lambda path: path.name[0] != '.', paths))
+
+    def switch_active_pane(self):
+        if self.active_pane == 0:
+            self.active_pane = 1
+            self.arr = '<<'
+        else:
+            self.active_pane = 0
+            self.arr = '>>'
+        self.header.set_text(str(self.panes[self.active_pane].currentdir))
 
     def pathify(self, *names, basedir=None):
         if basedir is None:
@@ -112,8 +156,7 @@ class Pymmander():
 
 
 if __name__ == "__main__":
-
     pm = Pymmander()
-    print(pm.currentdir.name)
-    pm.remove("trelelraler")
+    loop = urwid.MainLoop(pm.top, palette)
+    loop.run()
 
