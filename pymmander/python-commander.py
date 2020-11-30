@@ -4,10 +4,8 @@ import os
 import shutil
 import sys
 import getpass
+import argparse
 from pathlib import Path
-
-import urwid
-import widgets
 
 
 palette = [
@@ -23,11 +21,12 @@ palette = [
 class Pymmander():
     """File manager"""
 
-    def __init__(self):
+    def __init__(self, removing=False):
         self.root = Path.root
         self.home = Path.home()
         self.currentdir = Path(Path.home(), "test", "src", "aa")
         self.showHidden = False
+        self.removing = removing
         # UI Settings
         self.active_pane = 0
         self.arr = ">>"
@@ -37,13 +36,13 @@ class Pymmander():
         self.text_footer = self.get_text_footer()
         self.footer = urwid.AttrWrap(urwid.Text(self.text_footer), 'footer')
         self.panes = urwid.Columns(
-            [widgets.Pane("a", self.currentdir, self),
-            widgets.Pane("b", self.currentdir, self)
+            [widgets.Pane("a", self.currentdir, self, self.removing),
+            widgets.Pane("b", self.currentdir, self, self.removing)
             ], 3)
         self.top = urwid.AttrMap(urwid.Frame(self.panes, header=self.header, footer=self.footer), 'body')
 
     def get_text_footer(self):
-        return "F1 Help | F2 Copy {} | F3 Move {} | F4 Mkdir | F5 Rename | F6 Remove | F7 {} hidden files | F8 Quit".format(self.arr, self.arr, self.hid)
+        return "F2 Copy {} | F3 Move {} | F4 Mkdir | F5 Rename | F6 Remove | F7 {} hidden files | F8/q Quit".format(self.arr, self.arr, self.hid)
 
     def list_current_dir(self):
         self.list_dir(self.currentdir)
@@ -117,7 +116,7 @@ class Pymmander():
         try:
             shutil.copy(src, dest)
         except shutil.SameFileError:
-            print("Taki sam plik już istnieje")     #TODO: ma się wypisać w gdzieś w TUI
+            pass
 
     def _copydir(self, src, dest):
         src, dest = self.pathify(src, dest)
@@ -127,17 +126,17 @@ class Pymmander():
         try:
             shutil.copytree(src, dest)
         except FileExistsError:
-            print("Taki sam folder już istnieje") #TODO: wypisać w TUI
+            pass
 
     def move(self, src, dest):
         src, dest = self.pathify(src, dest)
 
-        if dest.is_file:
-            print("{} już istnieje, nadpisać?".format(dest.name))   #TODO: Wybranie opcji
-
         src = str(src)
         dest = str(dest)
-        shutil.move(src, dest)
+        try:
+            shutil.move(src, dest)
+        except shutil.Error:
+            pass
 
     def mkdir(self, name):
         try:
@@ -177,7 +176,36 @@ class Pymmander():
 
 
 if __name__ == "__main__":
-    pm = Pymmander()
+
+    description = """
+Menadżer plików na wzór Midnight Commandera.
+
+Do działania wymaga pakietu 'urwid'
+Instalacja: `pip install urwid`
+(lub inaczej, w zależności od używanego menadżera pakietów).
+
+UWAGA: Funkcja kasowania jest domyślnie nieaktywna, uruchamia
+się ją opcją '-r', '--removing'
+
+W tej wersji nie są jeszcze zaimplementowane funkcje
+zmiany nazwy pliku oraz tworzenia folderu
+    """
+
+    parser = argparse.ArgumentParser(
+        description=description,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-r', '--removing', help="aktywuje kasowanie plików",
+        action='store_true')
+    args = parser.parse_args()
+
+
+    import urwid
+    import widgets
+
+    if args.removing:
+        pm = Pymmander(removing=True)
+    else:
+        pm = Pymmander()
     loop = urwid.MainLoop(pm.top, palette)
     loop.run()
 

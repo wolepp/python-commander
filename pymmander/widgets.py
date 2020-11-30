@@ -16,10 +16,11 @@ class FileButton(urwid.Button):
         self._w = urwid.AttrMap(urwid.SelectableIcon(self.caption, cur_pos), 'file', focus_map='focus')
     
 class Pane(urwid.ListBox):
-    def __init__(self, name, path, pm):
+    def __init__(self, name, path, pm, removing=False):
         self.name = name
         self.pm = pm
         self.currentdir = path
+        self.removing = removing
         content = [
             FileButton("/..", self.parentdir_clicked)
         ]
@@ -39,11 +40,10 @@ class Pane(urwid.ListBox):
 
     def parentdir_clicked(self, filebutton):
         self.currentdir = self.currentdir.parent
-        self.pm.header.set_text(self.currentdir.name)
         self.update_content()
 
     def update_header(self):
-        self.pm.header.set_text("Asdf")
+        self.pm.header.set_text(str(self.currentdir))
 
     def update_content(self):
         self.update_header()
@@ -57,16 +57,25 @@ class Pane(urwid.ListBox):
         src = self.focus.file
         dest = other_pane.currentdir
         self.pm.copy(src, dest)
+        other_pane.update_content()
+        self.update_content()
 
     def move(self):
         other_pane = self.pm.get_other_pane(self.name)
         src = self.focus.file
         dest = other_pane.currentdir
         self.pm.move(src, dest)
+        other_pane.update_content()
+        self.update_content()
 
     def remove(self):
+        """Funkcja kasuje poprawnie, jest zakomentowana „w razie czego”"""
         src = self.focus.file
-        self.pm.remove(src)
+        if self.removing:
+            self.pm.remove(src)
+            self.update_content()
+        else:
+            self.pm.header.set_text("Usunięto by '{}'".format(src.name)) 
 
     def keypress(self, size, key):
         key = super(Pane, self).keypress(size, key)
@@ -84,9 +93,7 @@ class Pane(urwid.ListBox):
         elif key == 'f5':
             self.pm.header.set_text("Zmieniam nazwę")
         elif key == 'f6':
-            name = self.focus.file.name
-            # TODO: zamienić na wywołanie self.remove
-            self.pm.header.set_text("Usunięto by {}".format(name)) 
+            self.remove()
         elif key == 'f7':
             self.pm.switch_hidden()
         elif key == 'left':
