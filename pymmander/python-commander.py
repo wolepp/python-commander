@@ -26,21 +26,24 @@ class Pymmander():
     def __init__(self):
         self.root = Path.root
         self.home = Path.home()
-        self.currentdir = Path(Path.home(), "test", "src", "aa")
+        self.startdir = Path(Path.home(), "test", "src", "aa")
         self.showHidden = False
         # UI Settings
         self.active_pane = 0
         self.arr = ">>"
         self.hid = "show"
-        self.text_header = str(self.currentdir)
+        self.text_header = str(self.startdir)
         self.header = urwid.AttrWrap(urwid.Text(self.text_header), 'header')
-        self.text_footer = "F1 Copy {} | F2 Move {} | F3 Mkdir | F4 Rename | F5 Remove | F6 {} hidden files | F8 Quit".format(self.arr, self.arr, self.hid)
+        self.text_footer = self.get_text_footer()
         self.footer = urwid.AttrWrap(urwid.Text(self.text_footer), 'footer')
         self.panes = urwid.Columns(
-            [widgets.Pane("a", self.currentdir, self),
-            widgets.Pane("b", self.currentdir, self)
+            [widgets.Pane("a", self.startdir, self),
+            widgets.Pane("b", self.startdir, self)
             ], 3)
         self.top = urwid.AttrMap(urwid.Frame(self.panes, header=self.header, footer=self.footer), 'body')
+
+    def get_text_footer(self):
+        return "F1 Help | F2 Copy {} | F3 Move {} | F4 Mkdir | F5 Rename | F6 Remove | F7 {} hidden files | F8 Quit".format(self.arr, self.arr, self.hid)
 
     def list_current_dir(self):
         self.list_dir(self.currentdir)
@@ -65,6 +68,11 @@ class Pymmander():
             self.active_pane = 0
             self.arr = '>>'
         self.header.set_text(str(self.panes[self.active_pane].currentdir))
+        self.update_footer()
+
+    def update_footer(self):
+        self.text_footer = self.get_text_footer()
+        self.footer.set_text(self.text_footer)
 
     def pathify(self, *names, basedir=None):
         if basedir is None:
@@ -150,6 +158,13 @@ class Pymmander():
 
     def switch_hidden(self):
         self.showHidden = not self.showHidden
+        if self.showHidden:
+            self.hid = "hide"
+        else:
+            self.hid = "show"
+        for (pane, opt) in self.panes.contents:
+            pane.update_content()
+        self.update_footer()
 
     def disk_usage(self):
         return shutil.disk_usage(self.currentdir)

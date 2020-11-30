@@ -55,17 +55,19 @@ class Pane(urwid.ListBox):
         if key in ('f8', 'q'):
             raise urwid.ExitMainLoop()
         elif key == 'f1':
-            header.set_text("Kopiuje {}".format(filenames[fp]))
+            self.pm.header.set_text("Pokazuje pomoc")
         elif key == 'f2':
-            header.set_text("Przesuwam {}".format(filenames[fp]))
+            self.pm.header.set_text("Kopiuje {}".format("TODO"))
         elif key == 'f3':
-            header.set_text("Tworzę folder".format(filenames[fp]))
+            self.pm.header.set_text("Przesuwam {}".format("TODO"))
         elif key == 'f4':
-            header.set_text("Zmieniam nazwe".format(filenames[fp]))
+            self.pm.header.set_text("Tworzę folder")
         elif key == 'f5':
-            header.set_text("Usuwam {}".format(filenames[fp]))
+            self.pm.header.set_text("Zmieniam nazwę")
         elif key == 'f6':
-            header.set_text("Zmieniam widoczność".format(filenames[fp]))
+            self.pm.header.set_text("Usuwam {}".format("TODO"))
+        elif key == 'f7':
+            self.pm.switch_hidden()
         elif key == 'left':
             if self.pm.active_pane != 0:
                 self.pm.switch_active_pane()
