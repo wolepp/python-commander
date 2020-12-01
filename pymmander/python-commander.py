@@ -36,8 +36,8 @@ class Pymmander():
         self.text_footer = self.get_text_footer()
         self.footer = urwid.AttrWrap(urwid.Text(self.text_footer), 'footer')
         self.panes = urwid.Columns(
-            [widgets.Pane("a", self.currentdir, self, self.removing),
-            widgets.Pane("b", self.currentdir, self, self.removing)
+            [widgets_old.Pane("a", self.currentdir, self, self.removing),
+            widgets_old.Pane("b", self.currentdir, self, self.removing)
             ], 3)
         self.top = urwid.AttrMap(urwid.Frame(self.panes, header=self.header, footer=self.footer), 'body')
 
@@ -200,7 +200,7 @@ zmiany nazwy pliku oraz tworzenia folderu
 
 
     import urwid
-    import widgets
+    import widgets_old
 
     if args.removing:
         pm = Pymmander(removing=True)
