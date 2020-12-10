@@ -49,11 +49,30 @@ class FileManager():
             move_dest_path = self._get_copying_path(dest, copy_counter=0)
             self.move(src, move_dest_path, copy_counter+1)
 
-        
+    def mkdir(self, path: Path, name: str) -> None:
+        if path.joinpath(name).exists():
+            raise FileExistsError("Plik docelowy już istnieje")
+        path.joinpath(name).mkdir(parents=True)
 
+    def rm(self, path: Path) -> None:
+        if not path.exists():
+            return
+        if path.is_dir():
+            self.rmdir(path)
+        else:
+            os.remove(path)
+
+    def rmdir(self, path: Path) -> None:
+        shutil.rmtree(path)
+
+    def rename(self, src: Path, name: str) -> None:
+        dest = src.parent.joinpath(name)
+        if dest.exists() and not dest.samefile(src):
+            raise FileExistsError(f"{dest} już istnieje")
+        src.rename(src.parent.joinpath(name))
 
 if __name__ == "__main__":
     fm = FileManager()
     p = Path.home().joinpath("test")
-
+    fm.rename(p.joinpath("4_r"), "4_r")
 
