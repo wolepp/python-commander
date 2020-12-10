@@ -70,9 +70,3 @@ class FileManager():
         if dest.exists() and not dest.samefile(src):
             raise FileExistsError(f"{dest} już istnieje")
         src.rename(src.parent.joinpath(name))
-
-if __name__ == "__main__":
-    fm = FileManager()
-    p = Path.home().joinpath("test")
-    fm.rename(p.joinpath("4_r"), "4_r")
-
