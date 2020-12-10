@@ -13,7 +13,7 @@ SORT_HID_FILE_VAL = "30"
 class Pane(urwid.ListBox):
     def __init__(self):
         self.fm = FileManager()
-        self.curdir = Path.home()
+        self.curdir = Path.home().joinpath("test")
         self.initialize_body()
         super(Pane, self).__init__(self.body)
         self._w = urwid.AttrWrap(self, 'pane')
@@ -69,9 +69,6 @@ class Pane(urwid.ListBox):
 
     def keypress(self, size, key):
         key = super(Pane, self).keypress(size, key)
-        fp = self.focus_position
-        if key in ('f8', 'q'):
-            raise urwid.ExitMainLoop()
         # elif key == 'f1':
         #     self.pm.header.set_text("Pokazuje pomoc")
         # elif key == 'f2':
@@ -94,8 +91,7 @@ class Pane(urwid.ListBox):
         #     if self.pm.active_pane != 1:
         #         self.pm.switch_active_pane()
         #     return key
-        # else:
-        #     return key
+        return key
 
 if __name__ == "__main__":
 
