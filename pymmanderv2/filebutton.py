@@ -1,11 +1,11 @@
 import urwid
 from pathlib import Path
-from popup import PopUpDialog
 
 class FileButton(urwid.Button):
-    def __init__(self, file: Path, callback, caption=None):
+    def __init__(self, file: Path, callback, caption=None, backbutton=False):
         super(FileButton, self).__init__("")
         urwid.connect_signal(self, 'click', callback)
+        self.backbutton = backbutton
 
         self.filepath = file
         if not caption is None:
