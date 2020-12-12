@@ -13,8 +13,12 @@ class FileManager():
     def __init__(self):
         pass
 
-    def ls(self, path: Path) -> Sequence[Path]:
-        return [path.joinpath(p) for p in os.listdir(path)]
+    def ls(self, path: Path, with_hidden=False) -> Sequence[Path]:
+        paths = [path.joinpath(p) for p in os.listdir(path)]
+        if with_hidden:
+            return paths
+        return list(filter(lambda path: path.name[0] != '.', paths))
+        
 
     def _get_copying_path(self, path: Path, copy_counter: int) -> Path:
         if copy_counter == 0:
