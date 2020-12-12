@@ -11,9 +11,10 @@ SORT_FILE_VAL = "20"
 SORT_HID_FILE_VAL = "30"
 
 class Pane(urwid.ListBox):
-    def __init__(self):
+    def __init__(self, show_hidden):
+        self.show_hidden = show_hidden
         self.fm = FileManager()
-        self.curdir = Path.home().joinpath("test")
+        self.curdir = Path.home()
         self.initialize_body()
         super(Pane, self).__init__(self.body)
         self._w = urwid.AttrWrap(self, 'pane')
@@ -25,7 +26,7 @@ class Pane(urwid.ListBox):
 
     def make_filebuttons(self):
         filebuttons = []
-        for file in self.sort_paths(self.fm.ls(self.curdir)):
+        for file in self.sort_paths(self.fm.ls(self.curdir, self.show_hidden)):
             button = FileButton(file, self.button_clicked)
             filebuttons.append(button)
         return filebuttons
@@ -47,7 +48,7 @@ class Pane(urwid.ListBox):
 
     def make_parent_button(self):
         return FileButton(
-            self.curdir.parent, self.button_clicked, "/.."
+            self.curdir.parent, self.button_clicked, "/..", backbutton=True
         )
 
     def button_clicked(self, filebutton: FileButton):
@@ -56,41 +57,31 @@ class Pane(urwid.ListBox):
         self.open_dir(filebutton.filepath)
         self.update_content()
 
-    def update_content(self):
+    def update_content(self, show_hidden=None, preserve_focus=False):
+        if not show_hidden is None:
+            self.show_hidden = show_hidden
+
+        if preserve_focus:
+            fp = self.focus_position
         del self.body[0:]
         self.body.append(self.make_parent_button())
         self.body.extend(self.make_filebuttons())
+        if preserve_focus:
+            while fp >= len(self.body):
+                fp -= 1
+            self.set_focus(fp)
 
-    def test(self):
-        print(self.fm.ls(Path.home()))
+    def is_back_button_focused(self):
+        return self.focus.backbutton
 
     def open_dir(self, path: Path) -> None:
         self.curdir = path
 
+    def get_focus_filepath(self) -> Path:
+        return self.focus.filepath
+
     def keypress(self, size, key):
         key = super(Pane, self).keypress(size, key)
-        # elif key == 'f1':
-        #     self.pm.header.set_text("Pokazuje pomoc")
-        # elif key == 'f2':
-        #     self.copy()
-        # elif key == 'f3':
-        #     self.move()
-        # elif key == 'f4':
-        #     self.pm.header.set_text("Tworzę folder")
-        # elif key == 'f5':
-        #     self.pm.header.set_text("Zmieniam nazwę")
-        # elif key == 'f6':
-        #     self.remove()
-        # elif key == 'f7':
-        #     self.pm.switch_hidden()
-        # elif key == 'left':
-        #     if self.pm.active_pane != 0:
-        #         self.pm.switch_active_pane()
-        #     return key
-        # elif key == 'right':
-        #     if self.pm.active_pane != 1:
-        #         self.pm.switch_active_pane()
-        #     return key
         return key
 
 if __name__ == "__main__":
