@@ -20,6 +20,8 @@ kopiowanie, przenoszenie, zmianę nazwy, kasowanie, tworzenie nowych folderów.
 
 Operacja kasowania wymaga potwierdzenia (kasuje nieodwracalnie, tak jak 'rm').
 Można anulować wykonywanie operacji kasowania, tworzenia nowego folderu lub zmiany nazwy przez wciśnięcie Escape.
+
+Wojciech Lepich 2020
     """
 
     parser = argparse.ArgumentParser(
